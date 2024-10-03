@@ -4,8 +4,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqladmin import Admin
 
-from admin import ProductAdmin, CategoryAdmin
-from db import engine, init_db, destroy_db
+from utils.admin import ProductAdmin, CategoryAdmin
+from models.db import engine, init_db
 
 app = FastAPI()
 
