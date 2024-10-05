@@ -4,16 +4,15 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqladmin import Admin
 
-from utils.admin import ProductAdmin, CategoryAdmin
-from models.db import engine, init_db
+from apps.admin import ProductAdmin, CategoryAdmin
+from apps.models.db import db
 
 app = FastAPI()
-
-admin = Admin(app, engine)
+admin = Admin(app, db._engine)
 admin.add_view(ProductAdmin)
 admin.add_view(CategoryAdmin)
 
-app.mount("/static", StaticFiles(directory='static'), name='static')
+app.mount("/static", StaticFiles(directory='/home/sardor/PycharmProjects/fastApiProject/apps/static'), name='static')
 
 templates = Jinja2Templates(directory='templates')
 
@@ -50,14 +49,13 @@ users = [
 
 @app.on_event("startup")
 def on_startup():
-    # pass
-    init_db()
+    db.create_all()
 
 
 @app.on_event("shutdown")
 def on_startup():
     pass
-    # destroy_db()
+    # db.drop_all()
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -68,7 +66,6 @@ async def read_item(request: Request):
     return templates.TemplateResponse(request, 'user-list.html', context)
 
 
-# https://bootdey.com/
 @app.get("/users/{id}", response_class=HTMLResponse)
 async def read_item(request: Request, id: int):
     _user = None
@@ -81,3 +78,11 @@ async def read_item(request: Request, id: int):
     }
     return templates.TemplateResponse(request, 'user-detail.html', context)
 
+# @app.get("/")
+# async def root():
+#     return {"message": "Hello World"}
+#
+#
+# @app.get("/hello/{name}")
+# async def say_hello(name: str):
+#     return {"message": f"Hello {name}"}

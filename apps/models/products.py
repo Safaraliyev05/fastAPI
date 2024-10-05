@@ -1,12 +1,12 @@
 from html import unescape
 
-from config import storage
 from fastapi_storages.integrations.sqlalchemy import FileType
 from sqlalchemy import BigInteger, VARCHAR, ForeignKey, select
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy_file import ImageField
 
-from models.db import CreatedModel, db
+from config import storage
+from apps.models.db import CreatedModel, db
 
 
 class Category(CreatedModel):

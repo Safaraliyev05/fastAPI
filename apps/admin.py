@@ -1,6 +1,6 @@
 from sqladmin import ModelView
 
-from models.products import Product, Category
+from apps.models.products import Product, Category
 
 
 class ProductAdmin(ModelView, model=Product):
