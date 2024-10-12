@@ -16,7 +16,7 @@ admin = Admin(app, db._engine, authentication_backend=AuthBackend(conf.SECRET_KE
 admin.add_view(ProductAdmin)
 admin.add_view(CategoryAdmin)
 
-app.mount("/static", StaticFiles(directory='static'), name='static')
+app.mount("/static", StaticFiles(directory='apps/static'), name='static')
 
 templates = Jinja2Templates(directory='templates')
 
@@ -54,6 +54,7 @@ users = [
 @app.on_event("startup")
 async def on_startup():
     await db.create_all()
+    # pass
 
 
 @app.on_event("shutdown")

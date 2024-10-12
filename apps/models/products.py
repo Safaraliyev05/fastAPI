@@ -3,6 +3,7 @@ from sqlalchemy import BigInteger, VARCHAR, ForeignKey, select
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy_file import ImageField
 
+from apps.models import User
 from apps.models.database import CreatedBaseModel, db
 from config import storage
 
@@ -21,6 +22,8 @@ class Product(CreatedBaseModel):
     price: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Category.id, ondelete='CASCADE'))
     category: Mapped['Category'] = relationship('Category', back_populates='products')
+    owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(User.id, ondelete='CASCADE'))
+    owner: Mapped['User'] = relationship('User')
 
     @classmethod
     async def get_products_by_category_id(cls, category_id):
