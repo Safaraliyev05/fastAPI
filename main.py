@@ -3,16 +3,20 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqladmin import Admin
+from starlette.middleware.sessions import SessionMiddleware
 
 from apps.admin import ProductAdmin, CategoryAdmin
-from apps.models.db import db
+from apps.models import db
+from apps.utils.authentication import AuthBackend
+from config import conf
 
 app = FastAPI()
-admin = Admin(app, db._engine)
+app.add_middleware(SessionMiddleware, secret_key=conf.SECRET_KEY)
+admin = Admin(app, db._engine, authentication_backend=AuthBackend(conf.SECRET_KEY))
 admin.add_view(ProductAdmin)
 admin.add_view(CategoryAdmin)
 
-app.mount("/static", StaticFiles(directory='/home/sardor/PycharmProjects/fastApiProject/apps/static'), name='static')
+app.mount("/static", StaticFiles(directory='static'), name='static')
 
 templates = Jinja2Templates(directory='templates')
 
@@ -48,12 +52,12 @@ users = [
 
 
 @app.on_event("startup")
-def on_startup():
-    db.create_all()
+async def on_startup():
+    await db.create_all()
 
 
 @app.on_event("shutdown")
-def on_startup():
+async def on_startup():
     pass
     # db.drop_all()
 
