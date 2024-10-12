@@ -2,6 +2,7 @@ import os
 from dataclasses import dataclass, asdict
 
 from dotenv import load_dotenv
+from fastapi.templating import Jinja2Templates
 from fastapi_storages import FileSystemStorage
 
 load_dotenv()
@@ -37,3 +38,4 @@ class Configuration:
 conf = Configuration()
 
 storage = FileSystemStorage(path="media/")
+templates = Jinja2Templates(directory='templates')
