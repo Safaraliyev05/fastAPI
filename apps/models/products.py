@@ -1,6 +1,6 @@
 from fastapi_storages.integrations.sqlalchemy import FileType
 from slugify import slugify
-from sqlalchemy import BigInteger, String, VARCHAR, ForeignKey, select
+from sqlalchemy import BigInteger, String, VARCHAR, ForeignKey, select, CheckConstraint
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy_file import ImageField
 
@@ -20,16 +20,29 @@ class Product(CreatedBaseModel):
     name: Mapped[str] = mapped_column(VARCHAR(255))
     slug: Mapped[str] = mapped_column(String(255), unique=True)
     photo: Mapped[ImageField] = mapped_column(FileType(storage=storage))
-    price: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
-    discount_price: Mapped[str] = mapped_column(VARCHAR(255), nullable=True)
+    price: Mapped[float] = mapped_column(BigInteger, nullable=False)
+    discount_price: Mapped[float] = mapped_column(BigInteger, nullable=True)
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Category.id, ondelete='CASCADE'))
     category: Mapped['Category'] = relationship('Category', lazy='selectin', back_populates='products')
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
     owner: Mapped['User'] = relationship('User', lazy='selectin', back_populates='products')
 
+    __table_args__ = (
+        CheckConstraint('discount_price <= price', name='check_discount_price'),
+    )
+
     @classmethod
-    async def check_discount_price(cls, price, discount_price):
-        pass
+    async def create(cls, **kwargs):
+        _slug = slugify(kwargs['name'])
+        while await cls.get_by_slug(_slug) is not None:
+            _slug = slugify(kwargs['name'] + '-1')
+        kwargs['slug'] = _slug
+
+        if 'discount_price' in kwargs and kwargs['discount_price']:
+            if kwargs['discount_price'] > kwargs['price']:
+                raise ValueError("Discount price cannot be higher than price")
+
+        return await super().create(**kwargs)
 
     @classmethod
     async def get_products_by_category_id(cls, category_id):
@@ -40,11 +53,3 @@ class Product(CreatedBaseModel):
     async def get_by_slug(cls, slug: str):
         query = select(cls).where(cls.slug == slug)
         return (await db.execute(query)).scalar()
-
-    @classmethod
-    async def create(cls, **kwargs):
-        _slug = slugify(kwargs['name'])
-        while cls.get_by_slug(_slug) is not None:
-            _slug = slugify(kwargs['name'] + '-1')
-        kwargs['slug'] = _slug
-        return await super().create(**kwargs)

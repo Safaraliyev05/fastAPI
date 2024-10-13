@@ -22,7 +22,6 @@ app.mount("/static", StaticFiles(directory='apps/static'), name='static')
 async def on_startup():
     app.include_router(product_router)
     await db.create_all()
-    # pass
 
 
 @app.on_event("shutdown")

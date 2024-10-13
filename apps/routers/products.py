@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 from starlette.requests import Request
-from starlette.responses import RedirectResponse
 
 from apps.models import Product
 from config import templates
