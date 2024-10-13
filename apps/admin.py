@@ -4,7 +4,11 @@ from slugify import slugify
 from sqladmin import ModelView
 from starlette.requests import Request
 
-from apps.models import Product, Category
+from apps.models import Product, Category, ProductImage
+
+
+class ProductImageAdmin(ModelView, model=ProductImage):
+    column_list = ['id', 'photo', 'product']
 
 
 class ProductAdmin(ModelView, model=Product):

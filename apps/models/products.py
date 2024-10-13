@@ -19,13 +19,13 @@ class Category(CreatedBaseModel):
 class Product(CreatedBaseModel):
     name: Mapped[str] = mapped_column(VARCHAR(255))
     slug: Mapped[str] = mapped_column(String(255), unique=True)
-    photo: Mapped[ImageField] = mapped_column(FileType(storage=storage))
     price: Mapped[float] = mapped_column(BigInteger, nullable=False)
     discount_price: Mapped[float] = mapped_column(BigInteger, nullable=True)
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Category.id, ondelete='CASCADE'))
     category: Mapped['Category'] = relationship('Category', lazy='selectin', back_populates='products')
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
     owner: Mapped['User'] = relationship('User', lazy='selectin', back_populates='products')
+    images: Mapped[list['ProductImage']] = relationship('ProductImage', back_populates='products', lazy='selectin')
 
     __table_args__ = (
         CheckConstraint('discount_price <= price', name='check_discount_price'),
@@ -53,3 +53,9 @@ class Product(CreatedBaseModel):
     async def get_by_slug(cls, slug: str):
         query = select(cls).where(cls.slug == slug)
         return (await db.execute(query)).scalar()
+
+
+class ProductImage(CreatedBaseModel):
+    photo: Mapped[ImageField] = mapped_column(FileType(storage=storage('products/%Y/%m/%d')))
+    product_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Product.id, ondelete='CASCADE'))
+    products: Mapped['Product'] = relationship('Product', lazy='selectin', back_populates='images')
