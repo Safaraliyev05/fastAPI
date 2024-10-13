@@ -1,9 +1,12 @@
 import bcrypt
+from fastapi_storages.integrations.sqlalchemy import FileType
 from sqlalchemy import String, Boolean, select
 from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy_file import ImageField
 from starlette.authentication import BaseUser
 
 from apps.models.database import BaseModel, db
+from config import storage
 
 
 class User(BaseModel, BaseUser):
@@ -14,6 +17,7 @@ class User(BaseModel, BaseUser):
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="False")
     is_superuser: Mapped[bool] = mapped_column(Boolean, server_default="False")
     products: Mapped[list['Product']] = relationship('Product', back_populates='owner')
+    photo: Mapped[ImageField] = mapped_column(FileType(storage=storage('users/%Y/%m/%d')), nullable=True)
 
     def __str__(self):
         return super().__str__() + f" - {self.username}"

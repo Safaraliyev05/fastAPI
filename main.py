@@ -7,7 +7,7 @@ from sqladmin import Admin
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import FileResponse
 
-from apps.admin import ProductAdmin, CategoryAdmin, ProductImageAdmin
+from apps.admin import ProductAdmin, CategoryAdmin, ProductImageAdmin, UserAdmin
 from apps.models import db
 from apps.routers.products import product_router
 from apps.utils.authentication import AuthBackend
@@ -19,6 +19,7 @@ admin = Admin(app, db._engine, authentication_backend=AuthBackend(conf.SECRET_KE
 admin.add_view(ProductAdmin)
 admin.add_view(CategoryAdmin)
 admin.add_view(ProductImageAdmin)
+admin.add_view(UserAdmin)
 
 app.mount("/static", StaticFiles(directory='apps/static'), name='static')
 
