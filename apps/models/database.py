@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger, delete as sqlalchemy_delete, DateTime, update as sqlalchemy_update
+from sqlalchemy import BigInteger, delete as sqlalchemy_delete, DateTime, update as sqlalchemy_update, func
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncAttrs
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.future import select
-from sqlalchemy.orm import sessionmaker, DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import sessionmaker, DeclarativeBase, Mapped, mapped_column, selectinload
 
 from config import conf
 
@@ -78,13 +78,25 @@ class AbstractClass:
         return (await db.execute(query)).scalar()
 
     @classmethod
+    async def count(cls):
+        query = select(func.count()).select_from(cls)
+        return (await db.execute(query)).scalar()
+
+    @classmethod
     async def delete(cls, id_):
         query = sqlalchemy_delete(cls).where(cls.id == id_)
         await db.execute(query)
         await cls.commit()
 
     @classmethod
-    async def get_all(cls):
+    async def filter(cls, criteria, *, relationship):
+        query = select(cls).where(criteria)
+        if relationship:
+            query = query.options(selectinload(relationship))
+        return (await db.execute(query)).scalars()
+
+    @classmethod
+    async def all(cls):
         return (await db.execute(select(cls))).scalars()
 
 

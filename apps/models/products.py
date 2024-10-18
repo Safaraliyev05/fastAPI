@@ -10,10 +10,18 @@ from config import storage
 
 class Category(CreatedBaseModel):
     name: Mapped[str] = mapped_column(VARCHAR(255))
-    products: Mapped[list['Product']] = relationship('Product', back_populates='category')
+    products: Mapped[list['Product']] = relationship('Product', back_populates='category', lazy='selectin')
+
+    parent_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('categories.id', ondelete='CASCADE'), nullable=True)
+    parent: Mapped['Category'] = relationship('Category', lazy='selectin', remote_side='Category.id',
+                                              back_populates='subcategories')
+    subcategories: Mapped[list['Category']] = relationship('Category', back_populates='parent', lazy='selectin')
 
     def __str__(self):
-        return super().__str__() + f" - {self.name}"
+        _name = ''
+        if self.parent is None:
+            return self.name
+        return f"{self.parent} -> {self.name}"
 
 
 class Product(CreatedBaseModel):
@@ -21,10 +29,13 @@ class Product(CreatedBaseModel):
     slug: Mapped[str] = mapped_column(String(255), unique=True)
     price: Mapped[float] = mapped_column(BigInteger, nullable=False)
     discount_price: Mapped[float] = mapped_column(BigInteger, nullable=True)
+
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Category.id, ondelete='CASCADE'))
     category: Mapped['Category'] = relationship('Category', lazy='selectin', back_populates='products')
+
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
     owner: Mapped['User'] = relationship('User', lazy='selectin', back_populates='products')
+
     images: Mapped[list['ProductImage']] = relationship('ProductImage', back_populates='products', lazy='selectin')
 
     __table_args__ = (
