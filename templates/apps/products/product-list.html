@@ -43,24 +43,34 @@
     <div class="container bootdey">
         <div class="col-md-3">
             <section class="panel">
-                <div class="panel-body"><input type="text" placeholder="Keyword Search" class="form-control"/></div>
+                <div class="panel-body">
+                    <form action="{{ url_for('product_list')}}" method="GET">
+                        <input type="text" placeholder="Keyword Search" class="form-control" name="search" value=""/>
+                    </form>
+                </div>
             </section>
             <section class="panel">
                 <header class="panel-heading"> Category</header>
                 <div class="panel-body">
                     <ul class="nav prod-cat">
-                        <li>
-                            {% for category in categories %}
-                                <a href="#">
+                        {% for category in categories %}
+                            <li>
+                                <a href="{{ url_for('product_list') }}?category={{ category.id }}">
                                     <i class="fa fa-angle-right"></i> {{ category.name }}
                                 </a>
-                                {% for subcategory in category.subcategories %}
+                                {% if category.subcategories %}
                                     <ul class="nav">
-                                        <li><a href="#">- {{ subcategory.name }}</a></li>
+                                        {% for subcategory in category.subcategories %}
+                                            <li>
+                                                <a href="{{ url_for('product_list') }}?category={{ subcategory.id }}">
+                                                    - {{ subcategory.name }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
                                     </ul>
-                                {% endfor %}
-                            {% endfor %}
-                        </li>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
                     </ul>
                 </div>
             </section>

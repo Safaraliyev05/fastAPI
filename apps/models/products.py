@@ -27,6 +27,7 @@ class Category(CreatedBaseModel):
 class Product(CreatedBaseModel):
     name: Mapped[str] = mapped_column(VARCHAR(255))
     slug: Mapped[str] = mapped_column(String(255), unique=True)
+    description: Mapped[str] = mapped_column(String)
     price: Mapped[float] = mapped_column(BigInteger, nullable=False)
     discount_price: Mapped[float] = mapped_column(BigInteger, nullable=True)
 
@@ -41,24 +42,6 @@ class Product(CreatedBaseModel):
     __table_args__ = (
         CheckConstraint('discount_price <= price', name='check_discount_price'),
     )
-
-    @classmethod
-    async def create(cls, **kwargs):
-        _slug = slugify(kwargs['name'])
-        while await cls.get_by_slug(_slug) is not None:
-            _slug = slugify(kwargs['name'] + '-1')
-        kwargs['slug'] = _slug
-
-        if 'discount_price' in kwargs and kwargs['discount_price']:
-            if kwargs['discount_price'] > kwargs['price']:
-                raise ValueError("Discount price cannot be higher than price")
-
-        return await super().create(**kwargs)
-
-    @classmethod
-    async def get_products_by_category_id(cls, category_id):
-        query = select(cls).where(cls.category_id == category_id)
-        return (await db.execute(query)).scalars()
 
     @classmethod
     async def get_by_slug(cls, slug: str):

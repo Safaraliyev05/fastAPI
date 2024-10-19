@@ -89,11 +89,12 @@ class AbstractClass:
         await cls.commit()
 
     @classmethod
-    async def filter(cls, criteria, *, relationship):
+    async def filter(cls, criteria, *, relationship=None):
         query = select(cls).where(criteria)
         if relationship:
             query = query.options(selectinload(relationship))
-        return (await db.execute(query)).scalars()
+
+        return (await db.execute(query)).scalars().all()
 
     @classmethod
     async def all(cls):
