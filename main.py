@@ -9,6 +9,7 @@ from starlette.responses import FileResponse
 
 from apps.admin import ProductAdmin, CategoryAdmin, ProductImageAdmin, UserAdmin
 from apps.models import db
+from apps.routers.generate import generate_router
 from apps.routers.products import product_router
 from apps.utils.authentication import AuthBackend
 from config import conf
@@ -38,6 +39,7 @@ async def on_startup():
         os.mkdir('static')
     app.mount("/static", StaticFiles(directory='static'), name='static')
     app.include_router(product_router)
+    app.include_router(generate_router)
     await db.create_all()
 
 

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from faker import Faker
 from sqlalchemy import BigInteger, delete as sqlalchemy_delete, DateTime, update as sqlalchemy_update, func
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncAttrs
 from sqlalchemy.ext.declarative import declared_attr
@@ -81,6 +82,10 @@ class AbstractClass:
     async def count(cls):
         query = select(func.count()).select_from(cls)
         return (await db.execute(query)).scalar()
+
+    @classmethod
+    async def generate(cls, count: int = 1):
+        return Faker()
 
     @classmethod
     async def delete(cls, id_):

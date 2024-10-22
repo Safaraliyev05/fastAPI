@@ -29,3 +29,14 @@ class User(BaseModel, BaseUser):
 
     async def check_password(self, password: str):
         return bcrypt.checkpw(password.encode(), self.password.encode())
+
+    @classmethod
+    async def generate(cls, count: int = 1):
+        f = await super().generate(count)
+        for _ in range(count):
+            await cls.create(
+                first_name=f.first_name(),
+                last_name=f.last_name(),
+                username=f.user_name(),
+                password=f.password()
+            )

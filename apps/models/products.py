@@ -1,5 +1,4 @@
 from fastapi_storages.integrations.sqlalchemy import FileType
-from slugify import slugify
 from sqlalchemy import BigInteger, String, VARCHAR, ForeignKey, select, CheckConstraint
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy_file import ImageField
@@ -22,6 +21,14 @@ class Category(CreatedBaseModel):
         if self.parent is None:
             return self.name
         return f"{self.parent} -> {self.name}"
+
+    @classmethod
+    async def generate(cls, count: int = 1):
+        f = await super().generate(count)
+        for _ in range(count):
+            await cls.create(
+                name=f.company()
+            )
 
 
 class Product(CreatedBaseModel):
@@ -47,6 +54,17 @@ class Product(CreatedBaseModel):
     async def get_by_slug(cls, slug: str):
         query = select(cls).where(cls.slug == slug)
         return (await db.execute(query)).scalar()
+
+    @classmethod
+    async def generate(cls, count: int = 1):
+        f = await super().generate(count)
+        for _ in range(count):
+            name = f.company(),
+            await cls.create(
+                name=f.company(),
+                description=f.text(),
+                price=f.random_number(),
+            )
 
 
 class ProductImage(CreatedBaseModel):
