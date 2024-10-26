@@ -4,7 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from dotenv import load_dotenv
-from fastapi import APIRouter
+from fastapi import APIRouter, BackgroundTasks
 
 from celery_config import celery_app
 
@@ -17,7 +17,7 @@ SMTP_USERNAME = os.getenv('EMAIL')
 SMTP_PASSWORD = os.getenv('EMAIL_PASSWORD')
 
 
-@celery_app.task(name="send_email_smtp")
+@celery_app.task()
 def send_email_smtp(recipient_email: str, subject: str, message: str):
     msg = MIMEMultipart()
     msg["From"] = SMTP_USERNAME
@@ -33,6 +33,7 @@ def send_email_smtp(recipient_email: str, subject: str, message: str):
 
 
 @send_email.get("/send-email/{email}")
-async def send_notification(email: str):
-    send_email_smtp(email, "Notification", "Hello")
+async def send_notification(email: str, background_tasks: BackgroundTasks):
+    background_tasks.add_task(send_email_smtp.delay, email, "Notification", "Hello")
+
     return {"message": "Notification sent in the background"}
