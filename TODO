@@ -75,3 +75,4 @@ extra task:
 admin
 123
 $2b$12$qP/avhe49ATIZL0UWDPqTeiCzAlLLeZdwm6lTd5aHL5Ti3hgJ22uG
+celery -A celery_config.celery_app worker --loglevel=info

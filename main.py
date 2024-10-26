@@ -11,6 +11,7 @@ from apps.admin import ProductAdmin, CategoryAdmin, ProductImageAdmin, UserAdmin
 from apps.models import db
 from apps.routers.generate import generate_router
 from apps.routers.products import product_router
+from apps.routers.tasks import send_email
 from apps.utils.authentication import AuthBackend
 from config import conf
 
@@ -40,6 +41,7 @@ async def on_startup():
     app.mount("/static", StaticFiles(directory='static'), name='static')
     app.include_router(product_router)
     app.include_router(generate_router)
+    app.include_router(send_email)
     await db.create_all()
 
 

@@ -24,9 +24,9 @@ async def get_all_products(request: Request, category: int = None, search: str =
         products = await Product.all()
 
     if search:
-        products.filter(or_(
+        products = await Product.filter(or_(
             Product.name.ilike(f"%{search}%"),
-            # Product.description.ilike(f"%{search}%")
+            Product.description.ilike(f"%{search}%")
         ))
 
     categories = await Category.filter(Category.parent_id == None, relationship=Category.subcategories)
@@ -34,7 +34,6 @@ async def get_all_products(request: Request, category: int = None, search: str =
     context = {
         'products': products,
         'categories': categories,
-        'search': search
     }
     return templates.TemplateResponse(request, 'apps/products/product-list.html', context)
 
